@@ -1,0 +1,40 @@
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - .env.docker
+    volumes:
+      - teamspace_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"   # host:container
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    env_file:
+      - .env.docker
+    ports:
+      - "6379:6379"
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+ 
+volumes:
+  teamspace_data:

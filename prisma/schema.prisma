@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String            @id @default(uuid())
+  email         String            @unique
+  password      String
+  name          String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  workspaces    WorkspaceMember[]
+  messages      Message[]
+  files         File[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+}
+
+model Workspace {
+  id          String            @id @default(uuid())
+  name        String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  members     WorkspaceMember[]
+  channels    Channel[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  role        Role      @default(MEMBER)
+
+  userId      String
+  workspaceId String
+
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model Channel {
+  id          String    @id @default(uuid())
+  name        String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  messages    Message[]
+
+  @@index([workspaceId])
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  content     String?
+  channelId   String
+  senderId    String
+  createdAt   DateTime @default(now())
+
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  sender      User     @relation(fields: [senderId], references: [id])
+  files       File[]
+
+   @@index([channelId])
+}
+
+model File {
+  id          String   @id @default(uuid())
+  filename    String
+  url         String
+  messageId   String?
+  uploaderId  String
+  createdAt   DateTime @default(now())
+
+  message     Message? @relation(fields: [messageId], references: [id])
+  uploader    User     @relation(fields: [uploaderId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}

@@ -1,0 +1,1 @@
+A scalable backend collaboration platform where teams can create workspaces, chat in real-time, share files, and receive notifications.

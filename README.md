@@ -1,1 +1,2 @@
-A scalable backend collaboration platform where teams can create workspaces, chat in real-time, share files, and receive notifications.
+# teamspace-backend
+TeamSpace Backend is a scalable backend application built with NestJS, Prisma, Redis Pub/Sub, and PostgreSQL for modern team collaboration and workspace management.
